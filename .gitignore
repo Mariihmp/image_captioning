@@ -1,0 +1,12 @@
+# But DO NOT ignore the image_caption_transformer/ directory
+!image_caption_transformer/
+
+# And do not ignore this .gitignore file itself
+!.gitignore
+
+data/Images/
+
+
+2-context_enhanced_decoder/
+
+attention_image_captioning/
