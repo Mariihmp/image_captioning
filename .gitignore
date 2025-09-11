@@ -10,3 +10,6 @@ data/Images/
 2-context_enhanced_decoder/
 
 attention_image_captioning/
+
+model_artifacts/
+*.pth
