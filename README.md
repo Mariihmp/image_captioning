@@ -1,4 +1,4 @@
-<img src="media/Sun 3_15 PM.svg" alt="My Sized Logo" width="150">
+<img src="media/Sun_3_15_PM.svg" alt="My Sized Logo" width="150">
 
 
 **CNN-LSTM Model**
@@ -202,10 +202,10 @@ If the generated caption is "A dog is running in the park" and the reference cap
 
 - Generate captions for entire validation set and calculate BLEU and METEOR scores
 - BLEU and METEOR score for transformer model vs baseline_model image captioning 
-            BLEU-1 Score: 0.5464
-            BLEU-2 Score: 0.3372
-            BLEU-3 Score: 0.2139
-            BLEU-4 Score: 0.1318
+            -BLEU-1 Score: 0.5464
+            -BLEU-2 Score: 0.3372
+            -BLEU-3 Score: 0.2139
+            -BLEU-4 Score: 0.1318
 
             METEOR Score: 0.3899
 - baseline model image captioning 
