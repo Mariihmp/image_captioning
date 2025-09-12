@@ -1,4 +1,5 @@
-<img src="media/Sun_3_15_PM.svg" alt="My Sized Logo" width="150">
+![My Sized Logo](media/Sun%203_15%20PM.svg){: style="width:100%;"}
+
 
 
 **CNN-LSTM Model**
