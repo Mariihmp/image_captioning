@@ -13,3 +13,8 @@ attention_image_captioning/
 
 model_artifacts/
 *.pth
+# Shared pipeline outputs (large; regenerate with captioning/)
+/features/
+/runs/
+__pycache__/
+.pytest_cache/

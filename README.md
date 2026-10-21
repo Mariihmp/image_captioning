@@ -1,5 +1,65 @@
 ![My Sized Logo](media/Sun%203_15%20PM.svg){: style="width:100%;"}
 
+## Controlled comparison pipeline (`captioning/`)
+
+The original experiments below were run in separate notebooks with different
+test images, different text cleaning and different metric code, so their scores
+cannot be compared with each other. The `captioning/` package re-runs all three
+model types under **identical conditions**:
+
+| What | Same for every model |
+|---|---|
+| Split | official Flickr8k lists: 6000 train / 1000 test; the remaining 1091 images are validation |
+| Vocabulary | built from **training captions only** (words seen at least 5 times) |
+| Text cleaning | lowercase, letters only (`a` is kept), applied to training, reference and generated captions |
+| Image features | frozen EfficientNet-B0 with ImageNet normalisation, 8x8 grid of 1280-d region vectors, computed **once** |
+| Checkpoint | lowest validation loss (early stopping), not the last epoch |
+| Decoding | beam search (`--beam-size 1` = greedy) |
+| Metrics | COCO caption toolkit (`pycocoevalcap`): BLEU-1..4, METEOR, ROUGE-L, CIDEr (SPICE optional) |
+| Runs | several seeds per model, reported as mean ± standard deviation |
+
+Models (`captioning/models.py`):
+
+- `lstm`: CNN-LSTM "merge" baseline, a PyTorch port of `1-baseline_encoder_decoder`
+- `attention`: LSTM with soft attention (Xu et al., 2015, *Show, Attend and Tell*)
+- `transformer`: the encoder-decoder from `image_caption_transformer/model.py`
+
+### How to run
+
+```bash
+pip install -r requirements.txt
+# data/ must contain captions.txt, Flickr_8k.trainImages.txt, Flickr_8k.testImages.txt and Images/
+
+python -m captioning.extract_features --data-dir data --out-dir features   # once, about 1.3 GB
+
+for model in lstm attention transformer; do
+  for seed in 0 1 2; do
+    python -m captioning.train   --model $model --seed $seed
+    python -m captioning.predict --run-dir runs/${model}_seed${seed} --beam-size 3
+  done
+done
+
+python -m captioning.summarize --runs-dir runs --split test --beam-size 3   # results table
+python -m pytest tests                                                       # checks
+```
+
+`predict` also saves the log-probability of every generated word, for later
+confidence and hallucination analysis. METEOR and SPICE need Java installed.
+
+### Results (controlled comparison)
+
+*Not run yet.* Fill in from `python -m captioning.summarize`:
+
+| Model | Seeds | BLEU-1 | BLEU-4 | METEOR | ROUGE-L | CIDEr |
+|---|---|---|---|---|---|---|
+| lstm | 3 | | | | | |
+| attention | 3 | | | | | |
+| transformer | 3 | | | | | |
+
+---
+
+# Original experiments (preliminary)
+
 
 
 **CNN-LSTM Model**
@@ -201,21 +261,30 @@ If the generated caption is "A dog is running in the park" and the reference cap
 **METEOR Scores** typically range from **0 to 1**, with **1** indicating a perfect match to the reference captions.
 
 
-- Generate captions for entire validation set and calculate BLEU and METEOR scores
-- BLEU and METEOR score for transformer model vs baseline_model image captioning 
+> **Preliminary scores. Do not compare these two models with each other.**
+> They were computed under different conditions:
+> - the transformer was scored on a random 20% of images (1547, no fixed seed);
+>   the baseline on the official 1000 test images;
+> - the baseline's captions had punctuation and one-letter words (such as "a") removed; the transformer's did not;
+> - the transformer checkpoint is from the last epoch (20), although validation loss was lowest at epoch 12;
+> - METEOR comes from NLTK, which is not the official METEOR used in papers.
+>
+> See "Controlled comparison pipeline" at the top for the fair re-run.
+
+- Transformer model (greedy search, random 20% split)
             -BLEU-1 Score: 0.5464
             -BLEU-2 Score: 0.3372
             -BLEU-3 Score: 0.2139
             -BLEU-4 Score: 0.1318
 
-            METEOR Score: 0.3899
-- baseline model image captioning 
+            METEOR Score (NLTK): 0.3899
+- Baseline model (greedy search, official test split)
                 BLEU-1: 0.4334
                 BLEU-2: 0.2405
                 BLEU-3: 0.1376
                 BLEU-4: 0.0743
 
-                Average METEOR Score: 0.2589
+                Average METEOR Score (NLTK): 0.2589
 
 
 pytorch uses cuda to accelerate tensor operations and model training 
